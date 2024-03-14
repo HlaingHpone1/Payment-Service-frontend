@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { images } from "../components/ImgObject";
 import { AiOutlineClose } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const CreateRegister = () => {
     const [otp, setOtp] = useState("");
@@ -22,16 +23,26 @@ const CreateRegister = () => {
 
     const inputHandler = (e) => {
         const { name, value } = e.target;
+
         setData({
             ...data,
             [name]: value.trim(),
         });
     };
 
+    // useEffect(() => {
+    //     setData({
+    //         ...data,
+    //         userName: data.firstName + " " + data.lastName,
+    //     });
+    // }, [data.fieldName, data.lastName]);
+
     const calculateAge = (dob) => {
         const age = new Date().getFullYear() - new Date(dob).getFullYear();
         return age >= 18;
     };
+
+    const api = "http://localhost:8080/users";
 
     const submitHandler = (e) => {
         e.preventDefault();
@@ -54,11 +65,23 @@ const CreateRegister = () => {
         setErrors(newErrors);
 
         if (Object.keys(newErrors).length === 0) {
-            console.log("Success", data);
+            axios
+                .post(api, {
+                    firstName: data.firstName,
+                    lastName: data.lastName,
+                    userName: data.firstName + " " + data.lastName,
+                    phoneNumber: data.phoneNumber,
+                    mail: data.email,
+                    address: data.address,
+                    nrc: data.NRC,
+                    dob: data.DOB,
+                })
+                .then((res) => console.log(res.data))
+                .catch((err) => console.log(err));
         }
     };
 
-    console.log(errors);
+    console.log(data);
 
     return (
         <div className="py-2">

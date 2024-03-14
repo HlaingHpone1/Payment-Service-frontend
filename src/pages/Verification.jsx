@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import NumPad from "../components/numPad/NumPad";
 import { images } from "../components/ImgObject";
 import { AiOutlineClose } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useQuery } from "react-query";
 
 const Verification = () => {
     const [otp, setOtp] = useState("");
@@ -11,6 +12,9 @@ const Verification = () => {
     const [errors, setErrors] = useState({});
 
     const storedEmail = localStorage.getItem("userEmail");
+
+    const [secondsLeft, setSecondsLeft] = useState(60);
+    const [isResending, setIsResending] = useState(false);
 
     const receivePhoneNumber = (code) => {
         setOtp(code);
@@ -47,6 +51,53 @@ const Verification = () => {
             })
             .catch((err) => console.log(err));
     };
+
+    useEffect(() => {
+        const timerId = setInterval(() => {
+            if (secondsLeft > 0) {
+                setSecondsLeft(secondsLeft - 1);
+            } else {
+                clearInterval(timerId);
+            }
+        }, 1000);
+
+        return () => clearInterval(timerId);
+    }, [secondsLeft]);
+
+    const handleResend = async () => {
+        setIsResending(true); // Update button state
+        try {
+            await refetch();
+        } finally {
+            setIsResending(false); // Reset button state
+        }
+    };
+
+    const resendOTP = async () => {
+        const postAPI = `http://localhost:8080/auth/verify?mail=${storedEmail}`;
+        try {
+            const response = await axios.get(postAPI);
+            // return response.data;
+            setSecondsLeft(60);
+        } catch (error) {
+            throw error;
+        }
+    };
+
+    const { isLoading, error, refetch } = useQuery("resendOTP", resendOTP, {
+        enabled: false,
+    });
+
+    // const reSendOTPCode = () => {
+    //     const postAPI = `http://localhost:8080/auth/verify?mail=${storedEmail}`;
+
+    //     axios
+    //         .get(postAPI)
+    //         .then((res) => {
+    //             console.log("success Again");
+    //         })
+    //         .catch((error) => console.error("Error" + error));
+    // };
 
     return (
         <div className="py-5">
@@ -99,6 +150,7 @@ const Verification = () => {
                             maxLength={6}
                         />
                     </div>
+
                     <button
                         type="submit"
                         className="bg-primary text-white w-full py-3 rounded-lg mt-5"
@@ -106,6 +158,39 @@ const Verification = () => {
                         Submit
                     </button>
                 </form>
+                {/* <div className="countdown mt-3 ">
+                    {secondsLeft > 0 ? (
+                        <p className="text-center">{secondsLeft} seconds</p>
+                    ) : (
+                        <div className="flex justify-end">
+                            <button
+                                className=""
+                                type="submit"
+                                onClick={reSendOTPCode}
+                            >
+                                Resend Code
+                            </button>
+                        </div>
+                    )}
+                </div> */}
+                <div className="countdown mt-3 ">
+                    {secondsLeft > 0 ? (
+                        <p className="text-center">{secondsLeft} seconds</p>
+                    ) : (
+                        <div className="flex justify-end">
+                            <button
+                                className=""
+                                type="submit"
+                                onClick={handleResend}
+                                disabled={isLoading || isResending}
+                            >
+                                {isLoading || isResending
+                                    ? "Resending..."
+                                    : "Resend Code"}
+                            </button>
+                        </div>
+                    )}
+                </div>
             </div>
 
             <NumPad receivePhoneNumber={receivePhoneNumber} />
