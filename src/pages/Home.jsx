@@ -6,7 +6,7 @@ import MenuBar from "../components/menuBar/MenuBar";
 
 const Home = () => {
     return (
-        <div className="">
+        <div className="    h-[90vh]">
             <h2 className="text-3xl text-center text-primary font-bold pt-5 mb-10">
                 Talent Pay
             </h2>

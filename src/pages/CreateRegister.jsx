@@ -10,6 +10,7 @@ const CreateRegister = () => {
     const date = new Date().toISOString().split("T")[0];
 
     const [errors, setErrors] = useState({});
+    const storedEmail = localStorage.getItem("userEmail");
 
     const [data, setData] = useState({
         firstName: "",
@@ -49,6 +50,10 @@ const CreateRegister = () => {
 
         const newErrors = {};
 
+        if (storedEmail != data.email) {
+            newErrors.wrongMail = "Your Mail isn't same previous mail";
+        }
+
         for (const field in data) {
             if (data[field] == "") {
                 newErrors[field] = `${field} is required`;
@@ -76,7 +81,11 @@ const CreateRegister = () => {
                     nrc: data.NRC,
                     dob: data.DOB,
                 })
-                .then((res) => console.log(res.data))
+                .then((res) => {
+                    window.location.href = "/";
+                    localStorage.removeItem("userEmail");
+                    localStorage.setItem("userData", res.data);
+                })
                 .catch((err) => console.log(err));
         }
     };
@@ -168,6 +177,12 @@ const CreateRegister = () => {
                         {errors.email && (
                             <p className="text-red-700 rounded-lg mt-2 text-sm">
                                 {errors.email}
+                            </p>
+                        )}
+
+                        {!errors.email && errors.wrongMail && (
+                            <p className="text-red-700 rounded-lg mt-2 text-sm">
+                                {errors.wrongMail}
                             </p>
                         )}
                     </div>

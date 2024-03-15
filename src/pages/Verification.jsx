@@ -38,7 +38,7 @@ const Verification = () => {
                 console.log(res.data);
 
                 if (res.data.data == true) {
-                    localStorage.removeItem("userEmail");
+                    // localStorage.removeItem("userEmail");
                     navigate("/createAcc");
                 } else {
                     console.log(storedEmail);
@@ -100,7 +100,7 @@ const Verification = () => {
     // };
 
     return (
-        <div className="py-5">
+        <div className="py-5 h-[90vh]">
             <div className="languages__section mb-14">
                 <div className="languages flex justify-between items-center">
                     <div className="flex justify-start space-x-4 items-center">
